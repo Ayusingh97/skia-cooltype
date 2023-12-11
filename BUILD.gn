@@ -3029,8 +3029,56 @@ if (skia_enable_tools) {
 
   if (skia_use_gl && !skia_use_angle && (is_linux || is_win || is_mac)) {
     test_app("HelloWorld") {
-      sources = [ "example/HelloWorld.cpp" ]
+      sources = [ "example/HelloWorld.cpp",
+                  "example/ports/SkFontHost_CoolType.cpp",
+                  "example/ports/SkFontHost_CoolType.h",
+        	  "include/third_party/cooltype/include/source/SafeMemoryAPIs.cpp",
+        	  "include/third_party/cooltype/include/source/SafeStringAPIs.cpp",
+        	  "include/third_party/cooltype/include/source/BIBHostInit.cpp",
+        	  "include/third_party/cooltype/include/source/BRVMutex.cpp",
+        	  "include/third_party/cooltype/include/source/BRVMath.cpp",
+        	  "include/third_party/cooltype/include/source/BRVLib.cpp",
+        	  "include/third_party/cooltype/include/source/BRVClock.cpp",
+        	  "include/third_party/cooltype/include/source/BRVRegion.cpp",
+        	  "include/third_party/cooltype/include/source/BIB.cpp",
+        	  "include/third_party/cooltype/include/source/BRVTimer.cpp",
+        	  "include/third_party/cooltype/include/source/CT.cpp",
+        	  "include/third_party/cooltype/include/source/AGM.cpp",
+        	  "include/third_party/cooltype/include/source/BIBDataStoreImpl.cpp" ,
+        	  "include/third_party/cooltype/include/source/BIBFileDataStore.cpp",
+                ]
+
+       cflags = [ "-fexceptions",
+       		"-DBIB_NEW_HOST_INIT=1",
+         	"-DBIB_NO_STD_EXCEPTION=1" ,
+        	"-DBIB_MULTI_THREAD=1",
+         	"-DPIE_EXCEPTIONS=1"]
+          	"-DAGM_INDEPENDENT_CT=1",
+            	"-DACE_INDEPENDENT_CT=1"
+		]
+
+        cflags_cc = [ "-fexceptions" ]
+
+	#configs = [ "gn/portable:add_exceptions" ]
+
+     include_dirs = [ 
+                      "example",
+                      "example/ports",
+                      "include/third_party/cooltype/include/config/mac",
+                      "include/third_party/cooltype/include/api",
+                      ]
+
+     	defines = [ "PIE_EXCEPTIONS=1",
+       		"BIB_NEW_HOST_INIT=1",
+       		"BIB_NO_STD_EXCEPTION=1",
+       		"TT_SUPPORT_COLRV1=1"
+		] 
+
       libs = []
+ 
+    frameworks = [ "AdobeBIB.framework" ,
+                   "AdobeCoolType.framework" 
+		   ]
 
       deps = [
         ":flags",

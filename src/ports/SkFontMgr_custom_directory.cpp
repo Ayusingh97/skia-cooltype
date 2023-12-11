@@ -11,6 +11,8 @@
 #include "src/ports/SkFontMgr_custom.h"
 #include "src/utils/SkOSPath.h"
 
+//#include "include/third_party/cooltype/SkFontHost_CoolType.h"
+
 class DirectorySystemFontLoader : public SkFontMgr_Custom::SystemFontLoader {
 public:
     DirectorySystemFontLoader(const char* dir) : fBaseDirectory(dir) { }
@@ -100,5 +102,6 @@ private:
 };
 
 SK_API sk_sp<SkFontMgr> SkFontMgr_New_Custom_Directory(const char* dir) {
+//    return sk_make_sp<SkFontMgr_CoolType>();
     return sk_make_sp<SkFontMgr_Custom>(DirectorySystemFontLoader(dir));
 }

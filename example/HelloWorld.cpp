@@ -23,6 +23,23 @@
 #include "tools/window/DisplayParams.h"
 
 #include <string.h>
+#include "SkFontHost_CoolType.h"
+
+#include "BIBHost.h"
+#include "BIBContainer.h"
+#include "BIBStringAtom.h"
+#include "BIBMemoryBuffer.h"
+#include "BIBInit.h"
+#include "BIBVer.h"
+#include "BRVNumericTypes.h"
+#include "BIBDataStore.h"
+#include "BIBFileDataStore.h"
+#include "BIB.h"
+#include "CT.h"
+#include "ACEInit.h"
+#include "AGMInit.h"
+
+#include <iostream>
 
 using namespace sk_app;
 using skwindow::DisplayParams;
@@ -85,54 +102,70 @@ void HelloWorld::onBackendCreated() {
     fWindow->inval();
 }
 
+void bravo_init()
+{
+    BIBGetAddressProc fBIBGetProc = BIBHostInit(0, 0, 0, 0,0,"bibleak");
+    std::cout<<"Is BIB Initialized: " <<std::endl;
+    if (fBIBGetProc)
+        std::cout<<"YES! Continue execution... " << std::endl;
+    else
+    {
+        std::cout<<"NO!! Returning from here... "<< fBIBGetProc <<std::endl;
+        return;
+    }
+    
+    //CoolType Initialise
+    CTFontConfig    fInitFlags = kCTIncludeExtendedFonts | kCTPreferSystemFonts;
+    CTScript        fLocScript = kCTRomanScript;
+    CTFileConfig config = { kCTInit_v2,0,0,0,0,0,0,0,0 };
+    config.unicodeDirectory = "typesupport/unicode/";
+    config.fntNamesDBFile = "typesupport/FntNames.db";
+
+    BRVBool32 ret = CTInit(fBIBGetProc, fInitFlags, fLocScript, &config);
+
+    if (ret)
+    {
+        std::cout<<"CoolType Init: Success!" << std::endl;
+    }
+    else
+    {
+        std::cout<<"CoolType Init: Failed!" << std::endl;
+        return;
+    }
+
+}
+
 void HelloWorld::onPaint(SkSurface* surface) {
+    
+    bravo_init();
+    
     auto canvas = surface->getCanvas();
 
     // Clear background
     canvas->clear(SK_ColorWHITE);
 
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-
-    // Draw a rectangle with red paint
-    SkRect rect = SkRect::MakeXYWH(10, 10, 128, 128);
-    canvas->drawRect(rect, paint);
-
-    // Set up a linear gradient and draw a circle
-    {
-        SkPoint linearPoints[] = { { 0, 0 }, { 300, 300 } };
-        SkColor linearColors[] = { SK_ColorGREEN, SK_ColorBLACK };
-        paint.setShader(SkGradientShader::MakeLinear(linearPoints, linearColors, nullptr, 2,
-                                                     SkTileMode::kMirror));
+    std::string fontPath = "/Users/ayushisingh/Downloads/nitni_fonts/MinionPro-Regular.otf"; // Replace with the path to your custom font file
+    sk_sp<SkTypeface> typeface = SkTypeface_CoolType::MakeFromFile(fontPath.c_str());
+    //SkTypeface_CoolType::MakeFromFile(fontPath.c_str());
+        
+        if (!typeface) {
+            std::cout << "Failed to load the custom font file." << std::endl;
+            return;
+        }
+        // Set the text position
+        SkPoint textPosition = SkPoint::Make(50, 1000); // Set the position of the text
+        // Create an SkPaint for the text
+        SkPaint paint;
         paint.setAntiAlias(true);
-
-        canvas->drawCircle(200, 200, 64, paint);
-
-        // Detach shader
-        paint.setShader(nullptr);
-    }
-
-    // Draw a message with a nice black paint
-    SkFont font;
-    font.setSubpixel(true);
-    font.setSize(20);
-    paint.setColor(SK_ColorBLACK);
-
-    canvas->save();
-    static const char message[] = "Hello World ";
-
-    // Translate and rotate
-    canvas->translate(300, 300);
-    fRotationAngle += 0.2f;
-    if (fRotationAngle > 360) {
-        fRotationAngle -= 360;
-    }
-    canvas->rotate(fRotationAngle);
-
-    // Draw the text
-    canvas->drawSimpleText(message, strlen(message), SkTextEncoding::kUTF8, 0, 0, font, paint);
-
-    canvas->restore();
+        paint.setColor(SK_ColorBLACK);
+        // Set the font for the text
+        SkFont font(nullptr, 50); // Default typeface with size 24
+        font.setTypeface(typeface); // Specify a different typeface if desired
+        // Draw the text on the canvas
+        std::string text = "HELLO";
+        canvas->drawSimpleText(text.c_str(), text.length(), SkTextEncoding::kUTF8, textPosition.x(), textPosition.y(), font, paint);
+    
+	canvas->restore();
 }
 
 void HelloWorld::onIdle() {
